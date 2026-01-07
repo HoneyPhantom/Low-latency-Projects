@@ -38,7 +38,7 @@ int main() {
     generate_ticks(ticks , N);
     int best_bid = INT_MIN;
     int best_ask = INT_MAX;
-    for(int i = 0; i < N; ++i) update_book(ticks[i] ,best_bid , best_ask);
+    for(int i = 0; i < N; ++i) update_book(ticks[i] , best_bid , best_ask);
     
     std::cout << "Best Bid = " << best_bid << "\n";
     std::cout << "Best Ask = " << best_ask << "\n";
