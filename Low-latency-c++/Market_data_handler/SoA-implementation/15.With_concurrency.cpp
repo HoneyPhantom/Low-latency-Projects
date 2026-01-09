@@ -6,12 +6,6 @@ using namespace std;
 
 enum Side : uint8_t { BUY = 0, SELL = 1 };
 
-struct Tick {
-    int price;
-    int qty;
-    Side type;
-};
-
 inline static uint32_t fast_rng(uint32_t& state) {
     return state = state * 1664525u + 1013904223u;
 }
@@ -20,7 +14,9 @@ const int RING_SIZE = 4096;
 const int BATCH_SIZE = 64;
 
 struct alignas(64) SharedState {
-    Tick ring_buffer[RING_SIZE];
+    int price[RING_SIZE];
+    int qty[RING_SIZE];
+    Side type[RING_SIZE];
     alignas(64) atomic<uint32_t> head{0};
     alignas(64) atomic<uint32_t> tail{0};
     alignas(64) atomic<bool> done{false};
@@ -41,9 +37,9 @@ void generate_ticks(int n) {
         for (int j = 0; j < current_batch; ++j) {
             uint32_t idx = (h + j) & (RING_SIZE - 1);
             uint32_t r = fast_rng(s);
-            ss.ring_buffer[idx].type = (r & 1) ? BUY : SELL;
-            ss.ring_buffer[idx].price = 1000 + (r % 100);
-            ss.ring_buffer[idx].qty = 1 + (r % 50);
+            ss.type[idx] = (r & 1) ? BUY : SELL;
+            ss.price[idx] = 1000 + (r % 100);
+            ss.qty[idx] = 1 + (r % 50);
         }
         ss.head.fetch_add(current_batch, memory_order_release);
     }
@@ -58,13 +54,14 @@ void update_book(int& best_bid, int& best_ask) {
         if (local_tail < h) {
             while (local_tail < h) {
                 uint32_t idx = local_tail & (RING_SIZE - 1);
-                const Tick& t = ss.ring_buffer[idx];
-                if (t.type == BUY) {
-                    if (t.price > best_bid) best_bid = t.price;
-                } else {
-                    if (t.price < best_ask) best_ask = t.price;
+                const int& currPrice = ss.price[idx];
+                if (ss.type[idx] == BUY) {
+                    if (currPrice > best_bid) best_bid = currPrice;
+                } 
+                else {
+                    if (currPrice < best_ask) best_ask = currPrice;
                 }
-                local_tail++;
+                ++local_tail;
             }
             ss.tail.store(local_tail, memory_order_release);
         } 
