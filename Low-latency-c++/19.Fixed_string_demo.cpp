@@ -22,7 +22,7 @@ int main() {
         fs.append_int(i);
     }
 
-    auto t0 = clock::now();
+    auto start = clock::now();
     for (int i = 0; i < N; ++i) {
         fs.clear();
         fs.append("id=");
@@ -32,9 +32,9 @@ int main() {
         fs.append(", qty=");
         fs.append_int(i % 50);
     }
-    auto t1 = clock::now();
+    auto end = clock::now();
 
-    auto ns = chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+    auto ns = chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
     cout << "Built " << N << " strings in " << ns << " ns\n";
     cout << "Avg " << (double)ns / N << " ns/string\n";
 }

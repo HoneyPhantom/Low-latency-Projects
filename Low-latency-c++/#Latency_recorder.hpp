@@ -31,7 +31,7 @@ public:
 
     void report(ostream& out , size_t warmup_drop = 0) {
         if(samples.empty() || warmup_drop >= size()){
-            out << "No samples to report." << endl;
+            out << "No samples to report.\n";
             return;
         }
 
@@ -76,12 +76,12 @@ public:
             hist[bi]++;
         }
 
-        out << "Histogram (bucket = " << bucket_ns << " ns)" << endl;
+        out << "Histogram (bucket = " << bucket_ns << " ns)" << "\n";
         for(uint64_t i = 0; i < buckets; ++i) {
             uint64_t lo = i * bucket_ns;
             uint64_t hi = lo + bucket_ns - 1;
 
-            out << setw(6) << lo << " - " << setw(6) << hi << " ns : " << hist[i] << endl;
+            out << setw(6) << lo << " - " << setw(6) << hi << " ns : " << hist[i] << "\n";
         }
     }
 };
